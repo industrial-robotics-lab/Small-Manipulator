@@ -28,8 +28,12 @@
 #define dirPin6 55
 #define X_ENABLE_PIN6 38 // x axis
 
-void rotateOnAngle(float angle, bool direct, int axisNumber);
- bool flag = true;
+int dir_pins[6] = {25, 29, 33, 46, 60, 54};
+int incomingByte = 0; //just for serial
+int angles[7] = {0,0,0,0,0,0,0};
+
+void rotateOnAngle(float angle, int axisNumber);
+bool flag = true;
  
 void setup() {
   // enable 1-2-3 exis
@@ -81,42 +85,55 @@ void setup() {
    pinMode(X_ENABLE_PIN6, OUTPUT);
  digitalWrite(X_ENABLE_PIN6, LOW);
 
-  
+  Serial.begin(9600); // init serial conn
+
 }
+
 void loop() {
-  // These four lines result in 1 step:
- /*            for(int i=0; i<1056l; i++){
-     digitalWrite(stepPin4, HIGH);
-  delayMicroseconds(1000);
-  digitalWrite(stepPin4, LOW);
-    delayMicroseconds(1000);
+  //use input data from the serial port
+   if (Serial.available() > 0) {
+    int reading_mode = 1;
+    for(int i=1; i<7; i++){
+      angles[i] = Serial.readStringUntil(',').toInt();
+      Serial.read(); //next character is comma, so skip it using this
       }
-  */
-  if(flag == true){
-    
-   
-    rotateOnAngle(120.0, true, 2);
-     rotateOnAngle(120.0, false, 3);
-     rotateOnAngle(100.0, false, 1);
-     
+    // the last one value also should read
+    angles[6]  = Serial.readStringUntil('\0').toInt();
+    Serial.print("U sent: ");
+    for(int k=1; k<7; k++){
+        Serial.print(angles[k]);
+        Serial.print("-->");
+        if(angles[k]!=0){
+          rotateOnAngle(angles[k], k);
+          Serial.println("---rotates...");
+        }
+      }
     flag = false;
-  }
-      
+    Serial.println("---end");
+    }
+  
+  // These four lines result in 1 step:
+
+//  if(flag == true){
+//   for(int i=0; i<6; i++){
+//
+//   }
+//   flag = false;
+//  }
 }
-void rotateOnAngle(float angle, bool dir, int axisNumber){
+
+void rotateOnAngle(float angle, int axisNumber){
   const int numberStepsForSpin = 200; //количество шагов для одного оборота
   const int stepDevision = 16; // шаг дробления
   const float OneDegry = (numberStepsForSpin*stepDevision)/360.0;
-  float ratio = 1;  
+  float ratio = 1;
   if(axisNumber == 1){
-      if(dir==true)
-        digitalWrite(dirPin1, HIGH);
-      else
-        digitalWrite(dirPin1, LOW);
-      ratio = 4.8;  
+      if(angle<0) {digitalWrite(dirPin1, HIGH);}
+      else {digitalWrite(dirPin1, LOW);}
+      ratio = 4.8;
       int delValue=300;
       // число шагов двигаеля чтобы повернуться на заданный угол
-      float totSteps=angle*OneDegry*ratio; 
+      float totSteps=abs(angle)*OneDegry*ratio; 
       
       for (int i=0; i < totSteps; i++){
         digitalWrite(stepPin1, HIGH);
@@ -126,14 +143,12 @@ void rotateOnAngle(float angle, bool dir, int axisNumber){
       }
   }
   else if (axisNumber == 2){
-        if(dir==true)
-        digitalWrite(dirPin2, HIGH);
-      else
-        digitalWrite(dirPin2, LOW  );
-      ratio = 4;  
+        if(angle<0){digitalWrite(dirPin2, HIGH);}
+        else {digitalWrite(dirPin2, LOW);}
+      ratio = 4;
       int delValue=300;
       // число шагов двигаеля чтобы повернуться на заданный угол
-      float totSteps=angle*OneDegry*ratio; 
+      float totSteps=abs(angle)*OneDegry*ratio;
       
       for (int i=0; i < totSteps; i++){
         digitalWrite(stepPin2, HIGH);
@@ -143,15 +158,12 @@ void rotateOnAngle(float angle, bool dir, int axisNumber){
       }
   }
   else if (axisNumber == 3){
-        if(dir==true)
-        digitalWrite(dirPin3, HIGH);
-      else
-        digitalWrite(dirPin3, LOW );
+        if(angle<0){digitalWrite(dirPin3, HIGH);}
+        else {digitalWrite(dirPin3, LOW );}
       ratio = 5;  
       int delValue=300;
       // число шагов двигаеля чтобы повернуться на заданный угол
-      float totSteps=angle*OneDegry*ratio; 
-      
+      float totSteps=abs(angle)*OneDegry*ratio;
       for (int i=0; i < totSteps; i++){
         digitalWrite(stepPin3, HIGH);
         delayMicroseconds(delValue);
@@ -160,14 +172,12 @@ void rotateOnAngle(float angle, bool dir, int axisNumber){
       }
   }   
     else if (axisNumber == 4){
-        if(dir==true)
-        digitalWrite(dirPin4,HIGH );
-      else
-        digitalWrite(dirPin4,LOW );
+        if(angle<0){digitalWrite(dirPin4,HIGH );}
+      else {digitalWrite(dirPin4,LOW );}
       ratio = 2.8;  
       int delValue=300;
       // число шагов двигаеля чтобы повернуться на заданный угол
-      float totSteps=angle*OneDegry*ratio; 
+      float totSteps=abs(angle)*OneDegry*ratio; 
       
       for (int i=0; i < totSteps; i++){
         digitalWrite(stepPin4, HIGH);
@@ -177,10 +187,8 @@ void rotateOnAngle(float angle, bool dir, int axisNumber){
       }
   } 
     else if (axisNumber == 5){
-        if(dir==true)
-        digitalWrite(dirPin5, LOW);
-      else
-        digitalWrite(dirPin5, HIGH );
+      if(angle<0){ digitalWrite(dirPin5, LOW);}
+      else { digitalWrite(dirPin5, HIGH );}
       ratio = 2.1;  
       int delValue=300;
       // число шагов двигаеля чтобы повернуться на заданный угол
@@ -194,13 +202,10 @@ void rotateOnAngle(float angle, bool dir, int axisNumber){
       }
   }     
   else if (axisNumber == 6){
-      if(dir==true)
-        digitalWrite(dirPin6, HIGH);
-      else
-        digitalWrite(dirPin6, LOW);
-        
+      if(angle<0){digitalWrite(dirPin6, HIGH);}
+      else {digitalWrite(dirPin6, LOW);}
       int delValue=300;
-      float totSteps=angle*OneDegry;
+      float totSteps=abs(angle)*OneDegry;
       
       for (int i=0; i < totSteps; i++){
         digitalWrite(stepPin6, HIGH);

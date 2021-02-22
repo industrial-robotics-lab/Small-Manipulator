@@ -1,4 +1,4 @@
-# small-manipulator (SM 02)
+# Small Manipulator (SM 02)
 This project is about development of 6-axis robotics arm like industrial robots, but using the 3d printed parts instead of part made by machining of metal pieces.
 
 The repository structure arranged as follows:

@@ -93,17 +93,19 @@ int16_t AS5600_ReadAngle(uint8_t REG_H_ANGLE)
     // for the data from sensor
 	HAL_StatusTypeDef ret;
 	uint8_t buf[2];
-	uint8_t i = 0;
-//	uint8_t temp;
-	float temp = 0;
-	float temp1 = 0;
+//	uint8_t i = 0;
+//	int16_t temp = 0;
+	int16_t temp1;
+//	float temp = 0;
+//	float temp1 = 0;
 
     // Tell TMP102 that we want to read from the temperature register
     buf[0] = REG_H_ANGLE; //high bit
 
-	for (i = 0; i < 20; i++)
-	{
+//	for (i = 0; i < 10; i++)
+//	{
 		ret = HAL_I2C_Master_Transmit(&hi2c1, TMP102_ADDR, &buf, 1, HAL_MAX_DELAY);
+		HAL_Delay(5);
 		if ( ret != HAL_OK ) {
 		  strcpy((char*)buf, "Error Tx\r\n");
 		} else {
@@ -111,13 +113,13 @@ int16_t AS5600_ReadAngle(uint8_t REG_H_ANGLE)
 		  if ( ret != HAL_OK ) {
 			strcpy((char*)buf, "Error Rx\r\n");
 		  } else {
-				temp1 +=buf[0]*256+buf[1];
+				temp1 =buf[0]*256+buf[1];
 			}
 		}
-		HAL_Delay(5);
-	}
-	temp = temp1/20;
-	return temp;
+//		HAL_Delay(5);
+//	}
+//	temp = temp1/10;
+	return temp1;
 }
 
 int main(void)
@@ -126,10 +128,10 @@ int main(void)
 	uint8_t MSG[35] = {'\0'};
 	uint8_t X = 0;
 
-	int16_t val3;
-	int16_t Degrees = 360/40;
-    char Deg;
-    int Deg2;
+	int val3 = 0;
+
+    float Deg = 0.0;
+    float T2D = 360.0/4096.0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -173,9 +175,13 @@ int main(void)
 	  HAL_Delay(300);
 	  val3 = AS5600_ReadAngle(REG_H_ANGLE);
 	  // Convert to degree format
-	  Deg = val3 * Degrees;
-	  Deg2 = Deg;
-//	  HAL_UART_Transmit(&huart3, Degrees, strlen((char*)Degrees), HAL_MAX_DELAY);
+
+	  Deg = val3 * T2D;
+
+	  sprintf(MSG, "DATA Coming .. %d\r\n", Deg);
+//	  HAL_UART_Transmit_IT(&huart3, (uint8_t*)MSG, strlen(buff));
+
+	  HAL_UART_Transmit(&huart3, MSG, strlen((char*)MSG), HAL_MAX_DELAY);
       /* USER CODE END WHILE */
       /* USER CODE BEGIN 3 */
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);

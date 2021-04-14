@@ -1,0 +1,10 @@
+main.c:91:9:AS5600_ReadAngle	40	static
+main.c:123:5:main	56	static
+main.c:191:6:SystemClock_Config	232	static
+main.c:254:13:MX_I2C1_Init	8	static
+main.c:300:13:MX_TIM2_Init	48	static
+main.c:349:13:MX_TIM3_Init	48	static
+main.c:398:13:MX_USART3_UART_Init	8	static
+main.c:433:13:MX_USB_OTG_FS_PCD_Init	8	static
+main.c:468:13:MX_GPIO_Init	56	static
+main.c:522:6:Error_Handler	4	static,ignoring_inline_asm
